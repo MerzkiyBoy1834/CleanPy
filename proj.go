@@ -31,6 +31,15 @@ func initProject(projectPath string) {
 		os.Exit(1)
 	}
 
+	initContent := `"""Source package for the application."""
+# This file makes Python treat the src directory as a package
+`
+	if err := os.WriteFile(filepath.Join(srcDir, "__init__.py"), []byte(initContent), 0644); err != nil {
+		fmt.Printf("Error creating __init__.py: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("Created: src/__init__.py")
+
 	mainContent := `"""Main entry point for the application."""
 import sys
 
@@ -100,10 +109,77 @@ build/
 		fmt.Println("Initialized: git repository")
 	}
 
-	fmt.Println("\n✅ Project initialized successfully!")
+	fmt.Println("\nProject initialized successfully!")
 	fmt.Println("\nNext steps:")
 	fmt.Println("  1. cd " + projectPath)
-	fmt.Println("  2. cleanpy check  # Check code quality")
-	fmt.Println("  3. cleanpy build  # Compile the project")
-	fmt.Println("  4. cleanpy run    # Run the project")
+	fmt.Println("  2. clean-py check  # Check code quality")
+	fmt.Println("  3. clean-py run    # Run the project")
+}
+
+func projectRoot() (string, error) {
+	return os.Getwd()
+}
+
+func pythonEnv() ([]string, error) {
+	root, err := projectRoot()
+	if err != nil {
+		return nil, err
+	}
+
+	srcPath := filepath.Join(root, "src")
+	existing := os.Getenv("PYTHONPATH")
+	sep := string(os.PathListSeparator)
+	pythonPath := srcPath
+	if existing != "" {
+		pythonPath = srcPath + sep + existing
+	}
+
+	return append(os.Environ(), "PYTHONPATH="+pythonPath), nil
+}
+
+func configurePythonCmd(cmd *exec.Cmd) error {
+	root, err := projectRoot()
+	if err != nil {
+		return err
+	}
+
+	env, err := pythonEnv()
+	if err != nil {
+		return err
+	}
+
+	cmd.Dir = root
+	cmd.Env = env
+	return nil
+}
+
+func runProject() {
+	if _, err := os.Stat("src/main.py"); os.IsNotExist(err) {
+		fmt.Println("Error: src/main.py not found. Run 'cleanpy init' first")
+		os.Exit(1)
+	}
+
+	fmt.Println("\nRunning project...\n")
+	cmd := exec.Command("python3", filepath.Join("src", "main.py"))
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := configurePythonCmd(cmd); err != nil {
+		fmt.Printf("Error preparing Python environment: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("\nRuntime error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func cleanProject() {
+	if err := os.RemoveAll(buildDir); err != nil {
+		fmt.Printf("Error cleaning: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("Build artifacts cleaned!")
 }

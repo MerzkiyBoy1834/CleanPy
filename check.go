@@ -43,13 +43,17 @@ func checkProject() {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	if err := configurePythonCmd(cmd); err != nil {
+		fmt.Printf("Error preparing Python environment: %v\n", err)
+		os.Exit(1)
+	}
 
 	if err := cmd.Run(); err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			exitCode := exitErr.ExitCode()
 			if exitCode&1 == 1 || exitCode&2 == 2 {
 				fmt.Println()
-				fmt.Println("Found critical errors. Fix them before building.")
+				fmt.Println("Found critical errors. Fix them before running.")
 			} else if exitCode > 0 {
 				fmt.Printf("\nFound non-critical issues (exit code: %d).\n", exitCode)
 			}
@@ -94,13 +98,17 @@ func checkProjectSilent() bool {
 	cmd := exec.Command("python3", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	if err := configurePythonCmd(cmd); err != nil {
+		fmt.Printf("Error preparing Python environment: %v\n", err)
+		return false
+	}
 
 	if err := cmd.Run(); err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			exitCode := exitErr.ExitCode()
 			if exitCode&1 == 1 || exitCode&2 == 2 {
 				fmt.Println()
-				fmt.Println("Found critical errors. Build aborted.")
+				fmt.Println("Found critical errors. Run aborted.")
 				return false
 			}
 			if exitCode > 0 {

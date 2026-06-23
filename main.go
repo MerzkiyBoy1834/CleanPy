@@ -7,7 +7,7 @@ import (
 
 const (
 	buildDir = ".build"
-	version  = "1.0"
+	version  = "1.1"
 )
 
 func main() {
@@ -27,17 +27,10 @@ func main() {
 			os.Exit(1)
 		}
 		initProject(os.Args[2])
-	case "build":
-		fmt.Println("Running checks before build...")
-		if !checkProjectSilent() {
-			fmt.Println("\nBuild aborted due to critical errors!")
-			os.Exit(1)
-		}
-		buildProject()
 	case "run":
-		fmt.Println("Running checks before build...")
+		fmt.Println("Running checks before run...")
 		if !checkProjectSilent() {
-			fmt.Println("\nBuild aborted due to critical errors!")
+			fmt.Println("\nRun aborted due to critical errors!")
 			os.Exit(1)
 		}
 		runProject()
@@ -58,11 +51,10 @@ func printUsage() {
 	fmt.Println(`CleanPy - A simple Python project manager
 
 Usage:
-  cleanpy init              Initialize project in current directory
-  cleanpy new <name>        Create new project with given name
-  cleanpy build             Check and compile Python files to .pyc
-  cleanpy run               Check, build and run the project
-  cleanpy check             Run pylint on the project
-  cleanpy clean             Remove build artifacts
-  cleanpy version           Show version information`)
+  clean-py init              Initialize project in current directory
+  clean-py new <name>        Create new project with given name
+  clean-py run               Check and run the project
+  clean-py check             Run pylint on the project
+  clean-py clean             Remove build artifacts
+  clean-py version           Show version information`)
 }
