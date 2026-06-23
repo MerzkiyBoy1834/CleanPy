@@ -8,17 +8,16 @@ CleanPy is a simple project manager for Python that compiles code to .pyc and ru
 git clone https://github.com/MerzkiyBoy1834/CleanPy.git
 cd CleanPy
 go build
-sudo cp cleanpy /usr/local/bin/
+sudo cp clean-py /usr/local/bin/
 ```
 
 ## Usage
 
 ```bash
-cleanpy new <project_name>
+clean-py new <project_name>
 cd <project_name>
-cleanpy check
-cleanpy build
-cleanpy run
+clean-py check
+clean-py run
 ```
 
 ## Commands
@@ -28,8 +27,7 @@ cleanpy run
 | `init` | Initialize project in current directory |
 | `new <name>` | Create new project with given name |
 | `check` | Run pylint static analysis |
-| `build` | Compile Python files to .pyc |
-| `run` | Build and run the project |
+| `run` | Run the project |
 | `clean` | Remove build artifacts |
 | `version` | Show version information |
 
